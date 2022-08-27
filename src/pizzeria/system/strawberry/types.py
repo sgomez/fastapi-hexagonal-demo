@@ -9,12 +9,6 @@ from strawberry.fastapi import BaseContext
 from ..bus import Command, MessageBus, Query
 
 
-@strawberry.interface
-class UserError:
-    message: str
-    path: str
-
-
 @dataclass
 class Context(BaseContext):
     command_bus: MessageBus[Command, None]
@@ -45,5 +39,5 @@ def from_global_id(id: strawberry.ID) -> str:
     message_bytes = base64.b64decode(base64_bytes)
     try:
         return message_bytes.decode("utf-8").split(":")[1]
-    except Exception:
-        raise GraphQLError("invalid_global_id")
+    except Exception as exc:
+        raise GraphQLError("invalid_global_id") from exc

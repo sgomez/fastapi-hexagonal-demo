@@ -2,10 +2,19 @@ from dataclasses import dataclass
 from typing import Any
 
 from fastapi import FastAPI, Request
-from strawberry.fastapi import BaseContext, GraphQLRouter
 
-from pizzeria.pizza.application.commands import AddPizzaCommand, AddPizzaCommandHandler
-from pizzeria.pizza.application.queries import GetPizzasQuery, GetPizzasQueryHandler
+from pizzeria.pizza.application.commands.add_pizza import (
+    AddPizzaCommand,
+    AddPizzaCommandHandler,
+)
+from pizzeria.pizza.application.queries.get_pizza import (
+    GetPizzaQuery,
+    GetPizzaQueryHandler,
+)
+from pizzeria.pizza.application.queries.get_pizzas import (
+    GetPizzasQuery,
+    GetPizzasQueryHandler,
+)
 from pizzeria.pizza.infrastructure.services import (
     TortoisePizzaFinder,
     TortoisePizzaRepository,
@@ -36,6 +45,7 @@ def build_container() -> Container:
         AddPizzaCommand, AddPizzaCommandHandler(pizza_repository, pizza_finder)
     )
     container.query_bus.register_handler(GetPizzasQuery, GetPizzasQueryHandler(pizza_finder))
+    container.query_bus.register_handler(GetPizzaQuery, GetPizzaQueryHandler(pizza_finder))
 
     return container
 

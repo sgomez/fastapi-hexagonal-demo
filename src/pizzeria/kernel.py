@@ -1,7 +1,6 @@
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from loguru import logger
 
 from .system.database import register_orm
 from .system.logger import init_logging
@@ -49,9 +48,9 @@ app = Kernel(config=config).boot()
 init_logging()
 
 
-if __name__ == "__main__":
+def main() -> None:
     if config.debug:
-        import debugpy
+        import debugpy  # pylint: disable=import-outside-toplevel
 
         debugpy.listen(("0.0.0.0", 5678))
 
@@ -62,3 +61,7 @@ if __name__ == "__main__":
         reload=config.reload,
         workers=config.workers,
     )
+
+
+if __name__ == "__main__":
+    main()

@@ -1,5 +1,3 @@
-from typing import Any, Dict
-
 from fastapi import FastAPI
 from tortoise.backends.base.config_generator import generate_config
 from tortoise.contrib.fastapi import register_tortoise

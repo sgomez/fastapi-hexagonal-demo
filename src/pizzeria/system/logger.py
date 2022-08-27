@@ -34,7 +34,10 @@ def format_record(record: dict) -> str:
     Uses pformat for log any data like request/response body during debug.
     Works with logging if loguru handler it.
     Example:
-    >>> payload = [{"users":[{"name": "Nick", "age": 87, "is_active": True}, {"name": "Alex", "age": 27, "is_active": True}], "count": 2}]
+    >>> payload = [
+    >>>    {"users":[{"name": "Nick", "age": 87, "is_active": True},
+    >>>    {"name": "Alex", "age": 27, "is_active": True}], "count": 2}
+    >>> ]
     >>> logger.bind(payload=).debug("users payload")
     >>> [   {   'count': 2,
     >>>         'users': [   {'age': 87, 'is_active': True, 'name': 'Nick'},
@@ -51,8 +54,11 @@ def format_record(record: dict) -> str:
 
 
 def init_logging() -> None:
+
     loggers = (
-        logging.getLogger(name) for name in logging.root.manager.loggerDict if name.startswith("uvicorn.")
+        logging.getLogger(name)
+        for name in logging.root.manager.loggerDict  # pylint: disable=no-member
+        if name.startswith("uvicorn.")
     )
     for uvicorn_logger in loggers:
         uvicorn_logger.handlers = []

@@ -1,5 +1,4 @@
 import asyncio
-from dataclasses import asdict, dataclass
 from typing import Any, Dict, Iterator, Optional
 
 import pytest
@@ -30,18 +29,12 @@ def client(event_loop: asyncio.BaseEventLoop) -> Iterator[TestClient]:
     finalizer()
 
 
-@dataclass
-class PizzaFixture:
-    id: str
-    name: str
-    toppings: list[str]
-    price: int
-
-
-def execute_graphql_query(client: TestClient, query: str, input: Optional[Any] = None) -> Response:
+def execute_graphql_query(
+    client: TestClient, query: str, variables: Optional[Dict[str, Any]] = None
+) -> Response:
     data: Dict[str, Any] = {"query": query}
 
-    if input:
-        data["variables"] = {"input": asdict(input)}
+    if variables:
+        data["variables"] = variables
 
     return client.post("/graphql", json=data)

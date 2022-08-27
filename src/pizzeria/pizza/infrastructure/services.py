@@ -1,6 +1,8 @@
 from typing import List, Optional
+from uuid import UUID
 
-from ..application.queries import PizzaFinder, PizzaQueryResult
+from ..application.dto import PizzaDTO
+from ..application.services import PizzaFinder
 from ..domain import model
 from ..domain.repository import PizzaRepository
 from .models import PizzaModel, Pizzas
@@ -15,17 +17,28 @@ class TortoisePizzaRepository(PizzaRepository):
             toppings=pizza.toppings.values,
         ).save()
 
+    async def get(self) -> None:
+        return await super().get()
+
 
 class TortoisePizzaFinder(PizzaFinder):
-    async def find_all(self) -> List[PizzaQueryResult]:
+    async def find_all(self) -> List[PizzaDTO]:
         pizzas = await PizzaModel.from_queryset(Pizzas.all())
 
-        return [PizzaQueryResult(**pizza.dict()) for pizza in pizzas]
+        return [PizzaDTO(**pizza.dict()) for pizza in pizzas]
 
-    async def find_by_name(self, name: model.PizzaName) -> Optional[PizzaQueryResult]:
-        pizzas = await PizzaModel.from_queryset(Pizzas.filter(name=name.value))
+    async def find(self, id: UUID) -> Optional[PizzaDTO]:
+        pizza = await PizzaModel.from_queryset(Pizzas.filter(id=id))
+
+        if not pizza:
+            return None
+
+        return PizzaDTO(**pizza[0].dict())
+
+    async def find_by_name(self, name: str) -> Optional[PizzaDTO]:
+        pizzas = await PizzaModel.from_queryset(Pizzas.filter(name=name))
 
         if not pizzas:
             return None
 
-        return PizzaQueryResult(**pizzas[0].dict())
+        return PizzaDTO(**pizzas[0].dict())

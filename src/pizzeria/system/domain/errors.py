@@ -1,10 +1,11 @@
-from contextlib import AbstractContextManager
 from dataclasses import dataclass
 from typing import Dict, List
 
 
 @dataclass(frozen=True)
 class DomainError(Exception):
+    """Base domain error."""
+
     message: str
     label: str
     code: str
@@ -19,20 +20,12 @@ class DomainError(Exception):
 
 
 class LogicDomainError(DomainError):
-    ...
+    """Business logic error."""
 
 
 class RuleDomainError(DomainError):
-    ...
+    """Business rules error."""
 
 
-class DomainErrorContext(AbstractContextManager):
-    errors: Dict[str, List[Dict[str, str]]] = {}
-    success: bool = True
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        """Capture domain errors."""
-        if isinstance(exc_value, DomainError):
-            self.success = False
-            self.errors = exc_value.to_json()
-            return True
+class ValidationError(RuleDomainError):
+    """Value object validation error."""

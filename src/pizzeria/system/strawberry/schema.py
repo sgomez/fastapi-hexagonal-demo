@@ -3,7 +3,7 @@ from fastapi import Depends
 from strawberry.fastapi import GraphQLRouter
 from strawberry.tools import merge_types
 
-from pizzeria.pizza.infrastructure import graphql as pizza_schema
+from pizzeria.pizza.ports.graphql import schema as pizza_schema
 
 from ..container import Container, build_container
 from .types import Context

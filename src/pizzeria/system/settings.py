@@ -1,6 +1,5 @@
 from dotenv import dotenv_values
 from pydantic import BaseSettings
-from tortoise.backends.base.config_generator import generate_config
 
 __config = {
     **dotenv_values(".env"),
