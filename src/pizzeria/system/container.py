@@ -3,22 +3,10 @@ from typing import Any
 
 from fastapi import FastAPI, Request
 
-from pizzeria.pizza.application.commands.add_pizza import (
-    AddPizzaCommand,
-    AddPizzaCommandHandler,
-)
-from pizzeria.pizza.application.queries.get_pizza import (
-    GetPizzaQuery,
-    GetPizzaQueryHandler,
-)
-from pizzeria.pizza.application.queries.get_pizzas import (
-    GetPizzasQuery,
-    GetPizzasQueryHandler,
-)
-from pizzeria.pizza.infrastructure.services import (
-    TortoisePizzaFinder,
-    TortoisePizzaRepository,
-)
+from pizzeria.pizza.application.commands.add_pizza import AddPizzaCommand, AddPizzaCommandHandler
+from pizzeria.pizza.application.queries.get_pizza import GetPizzaQuery, GetPizzaQueryHandler
+from pizzeria.pizza.application.queries.get_pizzas import GetPizzasQuery, GetPizzasQueryHandler
+from pizzeria.pizza.infrastructure.services import TortoisePizzaFinder, TortoisePizzaRepository
 
 from .bus import Command, MessageBus, Query
 

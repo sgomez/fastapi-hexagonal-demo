@@ -53,6 +53,7 @@ asyncio_mode = "auto"
 
 [tool.isort]
 profile = "black"
+line_length = 110
 
 [tool.black]
 line-length = 110
@@ -78,7 +79,7 @@ plugins = [
 # ignore-patterns="^test_.*.py"
 
 [tool.pylint.'FORMAT']
-max-line-length=120
+max-line-length=110
 
 [tool.pylint.'MESSAGES CONTROL']
 disable=[
