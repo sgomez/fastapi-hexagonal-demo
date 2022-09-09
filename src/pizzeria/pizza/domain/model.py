@@ -1,21 +1,42 @@
 from dataclasses import dataclass
-from typing import ClassVar
+from typing import Any, ClassVar
 from uuid import UUID
 
-from pizzeria.system.domain.errors import ValidationError
+from result import Err, Ok, Result, as_result
+
+from pizzeria.system.domain.errors import DomainError
+
+from .errors import (
+    EmptyPizzaNameError,
+    FewPizzaToppingsError,
+    InvalidLengthPizzaNameError,
+    InvalidPizzaIdError,
+    InvalidPizzaToppingNameError,
+    NegativePriceError,
+    NotIntegerPriceError,
+)
 
 
 @dataclass(frozen=True)
 class PizzaId:
     value: UUID
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if not isinstance(self.value, UUID) or self.value.version != 4:
-            raise ValidationError(message="The id is not valid", label="id", code="pizza_id_invalid")
+            raise InvalidPizzaIdError
 
+    @as_result(DomainError)
     @staticmethod
-    def fromString(id_: str) -> "PizzaId":
-        return PizzaId(value=UUID(id_))
+    def from_string(value: str) -> "PizzaId":
+        try:
+            return PizzaId(value=UUID(value))
+        except ValueError as err:
+            raise InvalidPizzaIdError from err
+
+    @as_result(DomainError)
+    @staticmethod
+    def new(value: UUID) -> "PizzaId":
+        return PizzaId(value=value)
 
 
 @dataclass(frozen=True)
@@ -24,65 +45,75 @@ class PizzaName:
 
     value: str
 
-    def __post_init__(self):
-        if not isinstance(self.value, str):
-            raise ValidationError(message="The name is not valid", label="name", code="pizza_name_invalid")
+    def __post_init__(self) -> None:
+        if not isinstance(self.value, str) or len(self.value) == 0:
+            raise EmptyPizzaNameError
 
         if not 0 < len(self.value) <= self.MAX_LENGTH:
-            raise ValidationError(
-                message=f"The name cannot be longer than {self.MAX_LENGTH} characters",
-                label="name",
-                code="pizza_name_too_long",
-            )
+            raise InvalidLengthPizzaNameError(self.MAX_LENGTH)
+
+    @as_result(DomainError)
+    @staticmethod
+    def new(value: str) -> "PizzaName":
+        return PizzaName(value=value)
 
 
 @dataclass(frozen=True)
 class PizzaPrice:
     value: int
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if not isinstance(self.value, int):
-            raise ValidationError(message="The price is not valid", label="price", code="pizza_price_invalid")
+            raise NotIntegerPriceError
 
         if self.value <= 0:
-            raise ValidationError(
-                message="The price must be positive", label="price", code="pizza_price_non_positive"
-            )
+            raise NegativePriceError
+
+    @as_result(DomainError)
+    @staticmethod
+    def new(value: int) -> "PizzaPrice":
+        return PizzaPrice(value=value)
 
 
 @dataclass(frozen=True)
 class PizzaToppings:
     values: list[str]
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
+        if len(self.values) < 2:
+            raise FewPizzaToppingsError
+
         for topping in self.values:
             if not 0 < len(topping) < 25:
-                raise ValidationError(
-                    message="Invalid topping name", label="toppings", code="pizza_topping_invalid"
-                )
+                raise InvalidPizzaToppingNameError(topping)
+
+    @as_result(DomainError)
+    @staticmethod
+    def new(values: list[str]) -> "PizzaToppings":
+        return PizzaToppings(values=values)
 
 
 class Pizza:
-    __id: PizzaId
+    __pizza_id: PizzaId
     __name: PizzaName
     __price: PizzaPrice
     __toppings: PizzaToppings
 
     def __init__(
         self,
-        id: PizzaId,
+        pizza_id: PizzaId,
         name: PizzaName,
         price: PizzaPrice,
         toppings: PizzaToppings,
     ) -> None:
-        self.__id = id
+        self.__pizza_id = pizza_id
         self.__name = name
         self.__price = price
         self.__toppings = toppings
 
     @property
     def id(self) -> PizzaId:
-        return self.__id
+        return self.__pizza_id
 
     @property
     def name(self) -> PizzaName:
@@ -99,10 +130,17 @@ class Pizza:
 
 class PizzaFactory:
     @staticmethod
-    def build(id: str, name: str, price: int, toppings: list[str]) -> Pizza:
-        return Pizza(
-            id=PizzaId.fromString(id),
-            name=PizzaName(name),
-            price=PizzaPrice(price),
-            toppings=PizzaToppings(toppings),
-        )
+    def build(pizza_id: str, name: str, price: int, toppings: list[str]) -> Result[Pizza, list[DomainError]]:
+        values: dict[str, Result[Any, DomainError]] = {
+            "pizza_id": PizzaId.from_string(pizza_id),
+            "name": PizzaName.new(name),
+            "price": PizzaPrice.new(price),
+            "toppings": PizzaToppings.new(toppings),
+        }
+
+        errors = [value.unwrap_err() for value in values.values() if value.is_err()]
+
+        if errors:
+            return Err(errors)
+
+        return Ok(Pizza(**{key: value.unwrap() for key, value in values.items()}))
