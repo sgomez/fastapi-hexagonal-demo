@@ -7,14 +7,15 @@ license = "EUPL-1.2"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-fastapi = "^0.81.0"
+fastapi = "^0.82.0"
 uvicorn = {extras = ["standard"], version = "^0.18.2"}
 pydantic = {extras = ["dotenv"], version = "^1.9.2"}
 loguru = "^0.6.0"
 tortoise-orm = {extras = ["asyncpg", "asyncmy", "asyncodbc"], version = "^0.19.2"}
 aerich = "^0.6.3"
 ulid-py = "^1.1.0"
-strawberry-graphql = "^0.126.0"
+strawberry-graphql = "^0.128.0"
+result = "^0.8.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.2"
@@ -27,7 +28,6 @@ debugpy = "^1.6.3"
 pytest-bdd = "^6.0.1"
 requests = "^2.28.1"
 isort = "^5.10.1"
-pylint = "^2.14.5"
 pytest-env = "^0.6.2"
 nest-asyncio = "^1.5.5"
 types-requests = "^2.28.9"
@@ -37,6 +37,9 @@ pre-commit = "^2.20.0"
 
 [tool.poetry.scripts]
 serve = "pizzeria.kernel:main"
+
+[tool.poetry.group.dev.dependencies]
+flake8 = "^5.0.4"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -63,43 +66,21 @@ include = '\.pyi?$'
 [tool.mypy]
 python_version = "3.10"
 check_untyped_defs = true
+disallow_any_generics = true
+disallow_incomplete_defs = true
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+follow_imports = "skip"
 ignore_missing_imports = true
+no_implicit_optional = true
+pretty = true
+show_error_codes = true
+show_traceback = true
 strict_optional = true
-warn_unused_ignores = true
+warn_no_return = true
 warn_redundant_casts = true
 warn_unused_configs = true
-follow_imports = "skip"
+warn_unused_ignores = true
 plugins = [
   "strawberry.ext.mypy_plugin",
 ]
-
-
-
-[tool.pylint.'MASTER']
-# ignore-patterns="^test_.*.py"
-
-[tool.pylint.'FORMAT']
-max-line-length=110
-
-[tool.pylint.'MESSAGES CONTROL']
-disable=[
-  "missing-docstring",
-  "invalid-name",
-  "redefined-outer-name",
-  "too-few-public-methods",
-  "redefined-builtin",
-]
-
-[tool.pylint.'DESIGN']
-max-parents=13
-
-
-[tool.pylint.'SIMILARITIES']
-# Minimum lines number of a similarity.
-min-similarity-lines=8
-# Ignore comments when computing similarities.
-ignore-comments=true
-# Ignore docstrings when computing similarities.
-ignore-docstrings=false
-# Ignore imports when computing similarities.
-ignore-imports=true
