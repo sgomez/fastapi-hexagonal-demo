@@ -6,10 +6,10 @@ from typing import Callable
 import pytest_bdd
 from faker import Faker
 from hamcrest import assert_that, equal_to
-from pytest_bdd import given, parsers, scenario, then
+from pytest_bdd import given, parsers, then
 from requests import Response
 
-from pizzeria.pizza.ports.graphql.mutations.add_pizza import ValidationError
+from pizzeria.system.strawberry.errors import ValidationError
 
 from ..matchers import error_in_response
 from .conftest import PizzaFixture
@@ -46,7 +46,7 @@ def i_want_to_add_a_pizza_with_a_name_longer_than_n_characters(
 @given("I want to add a pizza with an empty name", target_fixture="pizza")
 def i_want_to_add_a_pizza_with_an_empty_name(
     make_pizza: Callable[[], PizzaFixture],
-):
+) -> PizzaFixture:
     """I want to add a pizza with an empty name."""
     pizza = make_pizza()
     pizza.name = ""

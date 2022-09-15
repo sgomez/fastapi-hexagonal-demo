@@ -7,6 +7,7 @@ from ..model import Pizza, PizzaFactory
 
 
 def test_build_pizza() -> None:
+    """Test to build a pizza."""
     # Arrange
     pizza_id = UUID("e50dbd3f-e915-4edb-8d13-7f5ff6dddd67")
 
@@ -18,6 +19,7 @@ def test_build_pizza() -> None:
 
 
 def test_build_pizza_with_errors() -> None:
+    """Test to build a pizza with errors."""
     # Arrange
 
     # Act

@@ -20,7 +20,7 @@ def test_there_are_no_pizzas_in_the_menu() -> None:
 
 @given("there are no pizzas in the menu")
 def there_are_no_pizzas_in_the_menu() -> None:
-    """there are no pizzas in the menu."""
+    """There are no pizzas in the menu."""
 
 
 @when("I want to browse all available pizzas", target_fixture="response")

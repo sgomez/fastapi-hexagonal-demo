@@ -13,6 +13,8 @@ MODULES = [
 
 
 class Settings(BaseSettings):
+    """Application settings."""
+
     host: str = "127.0.0.0"
     port: int = 8000
     reload: bool = False

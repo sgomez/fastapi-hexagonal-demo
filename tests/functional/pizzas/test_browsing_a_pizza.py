@@ -54,9 +54,8 @@ def i_see_its_details(pizza: PizzaFixture, response: Response) -> None:
 
 
 @then("I see the pizza does not exist")
-def i_see_the_pizza_does_not_exist(response: Response):
+def i_see_the_pizza_does_not_exist(response: Response) -> None:
     """I see the pizza does not exist."""
-
     content = response.json()
 
     assert_that(response.status_code, equal_to(200))

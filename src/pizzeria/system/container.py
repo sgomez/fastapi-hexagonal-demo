@@ -13,11 +13,14 @@ from .bus import Command, MessageBus, Query
 
 @dataclass
 class Container:
-    command_bus: MessageBus[Command, None]
-    query_bus: MessageBus[Query, Any]
+    """Container class."""
+
+    command_bus: MessageBus[Any, None]
+    query_bus: MessageBus[Any, Any]
 
 
 def build_container() -> Container:
+    """Container factory."""
     command_bus = MessageBus[Command, None]()
     query_bus = MessageBus[Query, Any]()
 
@@ -39,16 +42,19 @@ def build_container() -> Container:
 
 
 def container(app: FastAPI) -> FastAPI:
+    """Container wrapper."""
     app.state.container = build_container()
 
     return app
 
 
 def get_command_bus(request: Request) -> MessageBus[Command, None]:
+    """Command bus wrapper used for FastAPI DI."""
     return __get_container(request).command_bus
 
 
 def get_query_bus(request: Request) -> MessageBus[Query, Any]:
+    """Query bus wrapper used for FastAPI DI."""
     return __get_container(request).query_bus
 
 

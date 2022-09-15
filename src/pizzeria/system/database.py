@@ -10,6 +10,7 @@ def register_orm(
     database_url: str,
     generate_schemas: bool = False,
 ) -> None:
+    """Register Tortoise ORM service."""
     register_tortoise(
         app,
         db_url=database_url,

@@ -1,9 +1,4 @@
-from contextlib import AbstractContextManager
-from typing import List
-
 import strawberry
-
-from pizzeria.system.domain import errors
 
 
 @strawberry.interface
@@ -20,17 +15,32 @@ class ValidationError(Error):
     """Validation error interface."""
 
 
-class DomainErrorContext(AbstractContextManager):
-    errors: List[Error] = []
-    success: bool = True
+# _E = TypeVar("_E")
 
-    def __exit__(self, exc_type, exc_value, traceback):
-        """Capture domain errors."""
-        match exc_value:
-            case errors.DomainError(message, label, code):
-                self.success = False
-                self.errors = [ValidationError(message=message, path=label, code=code)]
-            case _:
-                return False
 
-        return True
+# class Context(Generic[_E]):
+#     """Strawberry context."""
+
+#     errors: List[_E] = []
+#     success: bool = True
+
+
+# class DomainErrorContext(AbstractContextManager["DomainErrorContext[_E]"], Generic[_E]):
+#     errors: List[Union[_E, Error]] = []
+#     success: bool = True
+
+#     def __exit__(
+#         self,
+#         exc_type: Optional[Type[BaseException]],
+#         exc_value: Optional[BaseException],
+#         traceback: Optional[TracebackType],
+#     ) -> Optional[bool]:
+#         """Capture domain errors."""
+#         match exc_value:
+#             case errors.DomainError(message, label, code):
+#                 self.success = False
+#                 self.errors = [ValidationError(message=message, path=label, code=code)]
+#             case _:
+#                 return False
+
+#         return True

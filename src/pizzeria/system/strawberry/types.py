@@ -1,6 +1,6 @@
 import base64
 from dataclasses import asdict, dataclass
-from typing import Any
+from typing import Any, TypeVar
 
 import strawberry
 from graphql import GraphQLError
@@ -11,17 +11,26 @@ from ..bus import Command, MessageBus, Query
 
 @dataclass
 class Context(BaseContext):
+    """Strawberry context."""
+
     command_bus: MessageBus[Command, None]
     query_bus: MessageBus[Query, Any]
 
 
+SelfNode = TypeVar("SelfNode", bound="Node")
+
+
 class Node:
+    """Graphgql Node."""
+
     @classmethod
-    def build_from_response(cls, obj: Any) -> Any:
-        return cls(**(asdict(obj) | {"id": to_global_id(cls.__name__, str(obj.id))}))
+    def build_from_response(cls, obj: Any) -> SelfNode:
+        """Build node from application layer response."""
+        return cls(**(asdict(obj) | {"id": to_global_id(cls.__name__, str(obj.id))}))  # type: ignore
 
     @classmethod
     def build_from_input(cls, obj: Any) -> Any:
+        """Builde node from graphql input."""
         return cls(**asdict(obj))
 
 
@@ -33,7 +42,7 @@ def to_global_id(node: str, id: str) -> strawberry.ID:
     return strawberry.ID(base64_bytes.decode("utf-8"))
 
 
-def from_global_id(id: strawberry.ID) -> str:
+def from_global_id(id: strawberry.ID | str) -> str:
     """Return an internal id."""
     base64_bytes = id.encode("utf-8")
     message_bytes = base64.b64decode(base64_bytes)

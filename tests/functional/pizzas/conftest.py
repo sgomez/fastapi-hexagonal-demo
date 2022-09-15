@@ -17,6 +17,8 @@ from ..conftest import execute_graphql_query
 
 @dataclass
 class PizzaFixture:
+    """Pizza fixture."""
+
     id: str
     name: str
     toppings: list[str]
@@ -24,7 +26,9 @@ class PizzaFixture:
 
 
 @pytest.fixture
-def make_pizza(faker: Faker) -> Callable:
+def make_pizza(faker: Faker) -> Callable[[], PizzaFixture]:
+    """Build a random pizza fixture."""
+
     def __make_pizza() -> PizzaFixture:
         _id = to_global_id("PizzaNode", str(uuid.uuid4()))
         _name = faker.name()
@@ -60,6 +64,7 @@ def make_pizza(faker: Faker) -> Callable:
 
 @pytest.fixture
 def pizzas_query() -> str:
+    """Graphql pizzas query."""
     return """
         query Pizzas {
           pizzas {
@@ -74,6 +79,7 @@ def pizzas_query() -> str:
 
 @pytest.fixture
 def pizza_query() -> str:
+    """Graphql pizza query."""
     return """
       query Pizza($pizzaId: ID!) {
         pizza(id: $pizzaId) {
@@ -88,6 +94,7 @@ def pizza_query() -> str:
 
 @pytest.fixture
 def add_pizza_mutation() -> str:
+    """Graphql add pizza muttation."""
     return """
         mutation AddPizza($input: PizzaInput!) {
           addPizza(input: $input) {
@@ -126,7 +133,7 @@ def there_are_a_pizza_in_the_menu(
     pizza = make_pizza()
     pizza.name = name
 
-    async def save_pizza():
+    async def save_pizza() -> Pizzas:
         return await Pizzas.create(
             id=uuid.UUID(from_global_id(pizza.id)),
             name=pizza.name,

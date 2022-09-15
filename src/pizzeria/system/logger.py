@@ -1,18 +1,19 @@
 import logging
 import sys
 from pprint import pformat
+from typing import Any, Dict
 
 from loguru import logger
 from loguru._defaults import LOGURU_FORMAT
 
 
 class InterceptHandler(logging.Handler):
-    """
-    Default handler from examples in loguru documentaion.
+    """Default handler from examples in loguru documentation.
+
     See https://loguru.readthedocs.io/en/stable/overview.html#entirely-compatible-with-standard-logging
     """
 
-    def emit(self, record: logging.LogRecord):
+    def emit(self, record: logging.LogRecord) -> None:  # noqa: D102
         # Get corresponding Loguru level if it exists
         try:
             level = logger.level(record.levelname).name
@@ -28,11 +29,12 @@ class InterceptHandler(logging.Handler):
         logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
 
 
-def format_record(record: dict) -> str:
-    """
-    Custom format for loguru loggers.
+def format_record(record: Dict[str, Any]) -> str:
+    """Custom format for loguru loggers.
+
     Uses pformat for log any data like request/response body during debug.
     Works with logging if loguru handler it.
+
     Example:
     >>> payload = [
     >>>    {"users":[{"name": "Nick", "age": 87, "is_active": True},
@@ -43,18 +45,18 @@ def format_record(record: dict) -> str:
     >>>         'users': [   {'age': 87, 'is_active': True, 'name': 'Nick'},
     >>>                      {'age': 27, 'is_active': True, 'name': 'Alex'}]}]
     """
-
-    format_string = LOGURU_FORMAT
+    format_string: str = LOGURU_FORMAT
     if record["extra"].get("payload") is not None:
         record["extra"]["payload"] = pformat(record["extra"]["payload"], indent=4, compact=True, width=88)
         format_string += "\n<level>{extra[payload]}</level>"
 
     format_string += "{exception}\n"
+
     return format_string
 
 
 def init_logging() -> None:
-
+    """Initialize logging using logguru."""
     loggers = (
         logging.getLogger(name)
         for name in logging.root.manager.loggerDict  # pylint: disable=no-member

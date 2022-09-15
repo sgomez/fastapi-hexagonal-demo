@@ -1,9 +1,11 @@
 from typing import Any, Optional
 
 import strawberry
+from result import Err, Result
 from strawberry.types import Info
 
-from pizzeria.system.strawberry.errors import DomainErrorContext, ValidationError
+from pizzeria.system.domain.errors import DomainError
+from pizzeria.system.strawberry.errors import ValidationError
 from pizzeria.system.strawberry.types import Context, from_global_id
 
 from ....application.commands.add_pizza import AddPizzaCommand
@@ -13,53 +15,79 @@ from ..types import PizzaInput, PizzaNode
 
 @strawberry.type
 class NameAlreadyExistsError(ValidationError):
-    ...
+    """Pizza name already exists error."""
+
+
+@strawberry.type
+class PizzaIdAlreadyExistsError(ValidationError):
+    """Pizza id already exists error."""
 
 
 AddPizzaError = strawberry.union(
     "AddPizzaError",
-    (NameAlreadyExistsError, ValidationError),
+    (PizzaIdAlreadyExistsError, NameAlreadyExistsError, ValidationError),
 )
 
 
 @strawberry.type
 class AddPizzaResponse:
+    """Add pizza mutation response."""
+
     pizza: Optional[PizzaNode]
     errors: list[AddPizzaError]
 
 
-class AddPizzaDomainErrorContext(DomainErrorContext):
-    def __exit__(self, exc_type, exc_value, traceback):
-
-        self.success = False
-
-        match exc_value:
+def domain_errors_to_graphql_errors_mapper(errors: list[DomainError]) -> list[AddPizzaError]:
+    """Map errors between domain errors and mutation errors."""
+    mapped_errors: list[AddPizzaError] = []
+    for error in errors:
+        match error:
+            case domain_errors.DuplicatedPizzaIdError(_) as err:
+                mapped_errors.append(
+                    PizzaIdAlreadyExistsError(
+                        message=err.message,
+                        code=err.code,
+                        path=err.label,
+                    )
+                )
             case domain_errors.DuplicatedNameError(_) as err:
-                self.errors.append(
+                mapped_errors.append(
                     NameAlreadyExistsError(
                         message=err.message,
                         code=err.code,
                         path=err.label,
                     )
                 )
-            case _:
-                return super().__exit__(exc_type, exc_value, traceback)
+            case domain_errors.ValidationError(_) as err:
+                mapped_errors.append(
+                    ValidationError(
+                        message=err.message,
+                        code=err.code,
+                        path=err.label,
+                    )
+                )
 
-        return True
+    return mapped_errors
 
 
 async def add_pizza_resolver(input: PizzaInput, info: Info[Context, Any]) -> AddPizzaResponse:
-    with AddPizzaDomainErrorContext() as context:
-        await info.context.command_bus.dispatch(
-            AddPizzaCommand(
-                id=from_global_id(input.id),
-                name=input.name,
-                price=input.price,
-                toppings=input.toppings,
-            )
+    """Add a pizza."""
+    mutation_result: Result[None, list[DomainError]] = await info.context.command_bus.dispatch(
+        AddPizzaCommand(
+            id=from_global_id(input.id),
+            name=input.name,
+            price=input.price,
+            toppings=input.toppings,
         )
+    )
 
-    if not context.success:
-        return AddPizzaResponse(pizza=None, errors=context.errors)
+    errors: list[AddPizzaError] = []
+    pizza: Optional[PizzaNode] = None
 
-    return AddPizzaResponse(pizza=PizzaNode.build_from_input(input), errors=[])
+    match mutation_result:
+        case Err(errors):  # type: ignore
+            pass
+        case _:
+            pizza = PizzaNode.build_from_input(input)
+
+    return AddPizzaResponse(pizza=pizza, errors=errors)

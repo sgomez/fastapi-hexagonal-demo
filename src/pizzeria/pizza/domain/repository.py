@@ -1,11 +1,20 @@
-from typing import Protocol
+from abc import ABC, abstractmethod
 
-from .model import Pizza
+from result import Result
+
+from .errors import PizzaNotFoundError
+from .model import Pizza, PizzaId
 
 
-class PizzaRepository(Protocol):
+class PizzaRepository(ABC):
+    """Pizza repository interface."""
+
+    @abstractmethod
     async def save(self, pizza: Pizza) -> None:
+        """Save a pizza entity in the repository."""
         raise NotImplementedError
 
-    async def get(self) -> None:
+    @abstractmethod
+    async def get(self, pizza_id: PizzaId) -> Result[Pizza, PizzaNotFoundError]:
+        """Get a pizza entity from the repository."""
         raise NotImplementedError

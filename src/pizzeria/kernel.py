@@ -9,6 +9,8 @@ from .system.strawberry.schema import graphql_router
 
 
 class Kernel:
+    """Kernel application class."""
+
     def __init__(self, config: Settings) -> None:
         self.__config = config
         self.__app = FastAPI(debug=self.__config.debug)
@@ -27,6 +29,7 @@ class Kernel:
         )
 
     def boot(self) -> FastAPI:
+        """Startup application."""
         if self.__boot:
             return self.__app
 
@@ -49,6 +52,7 @@ init_logging()
 
 
 def main() -> None:
+    """Entrypoint method."""
     if config.debug:
         import debugpy  # pylint: disable=import-outside-toplevel
 

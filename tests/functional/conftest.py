@@ -16,6 +16,7 @@ container(__app_test)
 
 @pytest.fixture(scope="function")
 def event_loop() -> Iterator[asyncio.AbstractEventLoop]:
+    """Application event loop fixture."""
     loop = asyncio.get_event_loop_policy().new_event_loop()
     yield loop
     loop.close()
@@ -23,6 +24,7 @@ def event_loop() -> Iterator[asyncio.AbstractEventLoop]:
 
 @pytest.fixture(scope="function")
 def client(event_loop: asyncio.BaseEventLoop) -> Iterator[TestClient]:
+    """Application test client fixture."""
     initializer(MODULES, loop=event_loop)
     with TestClient(__app_test) as c:
         yield c
@@ -32,6 +34,7 @@ def client(event_loop: asyncio.BaseEventLoop) -> Iterator[TestClient]:
 def execute_graphql_query(
     client: TestClient, query: str, variables: Optional[Dict[str, Any]] = None
 ) -> Response:
+    """Execute a request to the graphql endpoint."""
     data: Dict[str, Any] = {"query": query}
 
     if variables:

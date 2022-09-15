@@ -6,6 +6,8 @@ from pizzeria.system.strawberry.types import Node
 
 @strawberry.type
 class PizzaNode(Node):
+    """Pizza node."""
+
     id: ID
     name: str
     price: int
@@ -14,6 +16,8 @@ class PizzaNode(Node):
 
 @strawberry.input
 class PizzaInput:
+    """Pizza mutation input."""
+
     id: ID
     name: str
     price: int
@@ -22,4 +26,6 @@ class PizzaInput:
 
 @strawberry.type
 class PizzaDuplicatedNameError:
+    """Pizza mutation error."""
+
     name: str
